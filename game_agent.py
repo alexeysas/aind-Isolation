@@ -183,7 +183,7 @@ class MinimaxPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            score, move = self.minimax(game, self.search_depth)
+            move = self.minimax(game, self.search_depth)
             return move
 
         except SearchTimeout:
@@ -191,7 +191,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         # Return the best move from the last completed search iteration
         return self.best_move
-    
+
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
@@ -227,39 +227,49 @@ class MinimaxPlayer(IsolationPlayer):
                 function directly.
 
             (2) If you use any helper functions (e.g., as shown in the AIMA
+
                 pseudocode) then you must copy the timer check into the top of
                 each helper function or else your agent will timeout during
                 testing.
         """
+        _, move = self.minimax_search(game, depth)
+        return move
+
+    def minimax_search(self, game, depth):
+        """ min max """
+
         if self.time_left() < self.TIMER_THRESHOLD:
-            print('Timeout')
             raise SearchTimeout()
 
         moves = game.get_legal_moves()
         moves_count = len(moves)
 
+        #print(game.to_string())
+
         #chck for TERMINAL-TEST - return position score for minimax player
         if moves_count <= 0:
             score = game.utility(self)
+            print('Terminal test')
             move = (-1, -1)
             return score, move
 
         if depth == self.search_depth:
-            _, self.best_move = moves[0]
+            self.best_move = moves[0]
 
         if depth == 0:
             score = self.score(game, self)
             move = (-1, -1)
             return score, move
 
+        res = [(self.minimax_search(game.forecast_move(m), depth - 1)[0], m) for m in moves]
+        print(res)
+
         if game.active_player == self:
-            score, move = max([(self.minimax(game.forecast_move(m), depth - 1), m) for m in moves])
+            score, move = max(res)
         else:
-            score, move = min([(self.minimax(game.forecast_move(m), depth - 1), m) for m in moves])
+            score, move = min(res)
 
-        #score, move = min([(self.score(game.forecast_move(m), self), m) for m in moves])
         return score, move
-
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax

@@ -316,8 +316,9 @@ class Board(object):
 
         time_millis = lambda: 1000 * timeit.default_timer()
 
+        #i = 1 #my debug
         while True:
-
+            #print('Round:' + str(i) + ' Player:' + str(self._active_player)) #my debug
             legal_player_moves = self.get_legal_moves()
             game_copy = self.copy()
 
@@ -341,3 +342,6 @@ class Board(object):
             move_history.append(list(curr_move))
 
             self.apply_move(curr_move)
+
+            #input("Press Enter to continue...")
+            #i=i+1
