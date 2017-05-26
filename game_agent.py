@@ -310,7 +310,15 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         # TODO: finish this function!
-        raise NotImplementedError
+        self.best_move = (-1, -1)
+
+        try:
+            move = self.alphabeta(game, self.search_depth)
+            return move
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        return self.best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -362,3 +370,39 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # TODO: finish this function!
         raise NotImplementedError
+
+    def alfabeta_search(self, game, depth):
+        """ alfa beta """
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        moves = game.get_legal_moves()
+        moves_count = len(moves)
+
+        #print(game.to_string())
+
+        #chck for TERMINAL-TEST - return position score for minimax player
+        if moves_count <= 0:
+            score = game.utility(self)
+            print('Terminal test')
+            move = (-1, -1)
+            return score, move
+
+        if depth == self.search_depth:
+            self.best_move = moves[0]
+
+        if depth == 0:
+            score = self.score(game, self)
+            move = (-1, -1)
+            return score, move
+
+        res = [(self.alfabeta_search(game.forecast_move(m), depth - 1)[0], m) for m in moves]
+        print(res)
+
+        if game.active_player == self:
+            score, move = max(res)
+        else:
+            score, move = min(res)
+
+        return score, move
