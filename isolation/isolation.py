@@ -335,12 +335,12 @@ class Board(object):
 
             if curr_move not in legal_player_moves:
                 if len(legal_player_moves) > 0:
-                    return self._inactive_player, move_history, "forfeit"
-                print(curr_move)
+                    return self._inactive_player, move_history, "forfeit"               
                 return self._inactive_player, move_history, "illegal move"
 
             move_history.append(list(curr_move))
 
+            #print(curr_move)
             self.apply_move(curr_move)
 
             #input("Press Enter to continue...")
