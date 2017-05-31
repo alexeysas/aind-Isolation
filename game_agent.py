@@ -76,7 +76,7 @@ def custom_score(game, player):
         selected_move = random.randint(0, moves_count - 1)
         simulation.apply_move(moves[selected_move])
 
-    return float(own_moves - opp_moves + 2 * delta)
+    return float(own_moves - opp_moves + 20 * delta)
 
 
 def custom_score_2(game, player):
@@ -113,8 +113,9 @@ def custom_score_2(game, player):
     #if len(spaces) > 300:
     #   return -center_score(game, player)# + center_score(game, game.get_opponent(player))
 
+     #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+   
     own_moves = len(game.get_legal_moves(player))
-    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(-own_moves)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
