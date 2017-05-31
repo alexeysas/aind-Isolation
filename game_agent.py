@@ -15,7 +15,7 @@ def center_score(game, player):
 
     return float((h - y)**2 + (w - x)**2)
 
-def free_area_score(game, player, e=3, spaces = None): 
+def free_area_score(game, player, e=2, spaces = None): 
     y, x = game.get_player_location(player)
 
     if spaces == None:
@@ -50,7 +50,7 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    #aggressive player
+
     if game.is_loser(player):
         return float("-inf")
 
@@ -60,7 +60,23 @@ def custom_score(game, player):
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    return float(own_moves - opp_moves + 0.5 * center_score(game, player) - 0.5 * center_score(game, game.get_opponent(player)))
+    simulation = game.copy()
+
+    delta = 0
+
+    while True:
+        moves = simulation.get_legal_moves()
+        moves_count = len(moves)
+        if moves_count == 0:
+            if simulation.is_winner(player):
+                delta = 1
+            else:
+                delta = -1
+            break
+        selected_move = random.randint(0, moves_count - 1)
+        simulation.apply_move(moves[selected_move])
+
+    return float(own_moves - opp_moves + 2 * delta)
 
 
 def custom_score_2(game, player):
@@ -92,14 +108,14 @@ def custom_score_2(game, player):
         return float("inf")
 
     #defensive player
-    spaces = game.get_blank_spaces()
+    #spaces = game.get_blank_spaces()
 
-    if len(spaces) > 30:
-        return -center_score(game, player)# + center_score(game, game.get_opponent(player))
+    #if len(spaces) > 300:
+    #   return -center_score(game, player)# + center_score(game, game.get_opponent(player))
 
     own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(- opp_moves)
+    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(-own_moves)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 

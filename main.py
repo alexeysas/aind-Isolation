@@ -203,7 +203,7 @@ player1 = AlphaBetaPlayer()
 player1.score = improved_score
 
 player2 = AlphaBetaPlayer()
-player1.score = custom_score_2
+player2.score = custom_score
 
 game = Board(player1, player2)
 
