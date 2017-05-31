@@ -30,8 +30,6 @@ def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
-    This should be the best heuristic function for your project submission.
-
     Note: this function should be called from within a Player instance as
     `self.score()` -- you should not need to call this function directly.
 
@@ -50,39 +48,45 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-
+    
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
-    
-    spaces = game.get_blank_spaces()
+
     own_moves = len(game.get_legal_moves(player))
-
-    if len(spaces) > 30:
-        return float(own_moves) # + center_score(game, game.get_opponent(player))
-
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
     delta = 0
+   
+    moves = game.get_legal_moves()
+    initial_moves_count = len(moves)
+    indexes = np.random.permutation(initial_moves_count)
 
-    for _ in range(1, 3):
+    for i in range(0, min(4, initial_moves_count)):
+        first_level = True
         simulation = game.copy()
-
+        depth = 0
         while True:
+            depth = depth + 1
             moves = simulation.get_legal_moves()
             moves_count = len(moves)
             if moves_count == 0:
                 if simulation.is_winner(player):
-                    delta = delta + 1
+                    delta = delta + depth
                 else:
-                    delta = delta - 1
+                    delta = delta + depth
                 break
-            selected_move = random.randint(0, moves_count - 1)
+            if first_level:
+                selected_move = indexes[i]
+                first_level = False
+            else:
+                selected_move = random.randint(0, moves_count - 1)
+
             simulation.apply_move(moves[selected_move])
 
-    return float(own_moves - opp_moves + delta)
+    return float(own_moves * delta) #float(own_moves - opp_moves + 5 * delta)
 
 
 def custom_score_2(game, player):
@@ -143,7 +147,7 @@ def custom_score_2(game, player):
 
             simulation.apply_move(moves[selected_move])
 
-    return float(own_moves + delta) #float(own_moves - opp_moves + 5 * delta)
+    return float(own_moves + 0.1 * delta) #float(own_moves - opp_moves + 5 * delta)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 
