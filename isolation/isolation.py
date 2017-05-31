@@ -199,11 +199,12 @@ class Board(object):
             A coordinate pair (row, column) indicating the next position for
             the active player on the board.
         """
-        idx = move[0] + move[1] * self.height
-        last_move_idx = int(self.active_player == self._player_2) + 1
-        self._board_state[-last_move_idx] = idx
-        self._board_state[idx] = 1
-        self._board_state[-3] ^= 1
+        if True: #self._player_1 == self._active_player:
+            idx = move[0] + move[1] * self.height
+            last_move_idx = int(self.active_player == self._player_2) + 1
+            self._board_state[-last_move_idx] = idx
+            self._board_state[idx] = 1
+            self._board_state[-3] ^= 1
         self._active_player, self._inactive_player = self._inactive_player, self._active_player
         self.move_count += 1
 
@@ -341,6 +342,7 @@ class Board(object):
             move_history.append(list(curr_move))
 
             #print(curr_move)
+                        
             self.apply_move(curr_move)
 
             #input("Press Enter to continue...")

@@ -3,7 +3,7 @@ test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
 import random
-
+import numpy as np
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -56,27 +56,33 @@ def custom_score(game, player):
 
     if game.is_winner(player):
         return float("inf")
-
+    
+    spaces = game.get_blank_spaces()
     own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    simulation = game.copy()
+    if len(spaces) > 30:
+        return float(own_moves) # + center_score(game, game.get_opponent(player))
+
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
     delta = 0
 
-    while True:
-        moves = simulation.get_legal_moves()
-        moves_count = len(moves)
-        if moves_count == 0:
-            if simulation.is_winner(player):
-                delta = 1
-            else:
-                delta = -1
-            break
-        selected_move = random.randint(0, moves_count - 1)
-        simulation.apply_move(moves[selected_move])
+    for _ in range(1, 3):
+        simulation = game.copy()
 
-    return float(own_moves - opp_moves + 20 * delta)
+        while True:
+            moves = simulation.get_legal_moves()
+            moves_count = len(moves)
+            if moves_count == 0:
+                if simulation.is_winner(player):
+                    delta = delta + 1
+                else:
+                    delta = delta - 1
+                break
+            selected_move = random.randint(0, moves_count - 1)
+            simulation.apply_move(moves[selected_move])
+
+    return float(own_moves - opp_moves + delta)
 
 
 def custom_score_2(game, player):
@@ -107,16 +113,37 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    #defensive player
-    #spaces = game.get_blank_spaces()
+    #own_moves = len(game.get_legal_moves(player))
+    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    #if len(spaces) > 300:
-    #   return -center_score(game, player)# + center_score(game, game.get_opponent(player))
-
-     #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    delta = 0
    
-    own_moves = len(game.get_legal_moves(player))
-    return float(-own_moves)
+    moves = game.get_legal_moves()
+    initial_moves_count = len(moves)
+    indexes = np.random.permutation(initial_moves_count)
+
+    for i in range(0, min(4, initial_moves_count)):
+        first_level = True
+        simulation = game.copy()
+
+        while True:
+            moves = simulation.get_legal_moves()
+            moves_count = len(moves)
+            if moves_count == 0:
+                if simulation.is_winner(player):
+                    delta = delta + 1
+                else:
+                    delta = delta - 1
+                break
+            if first_level:
+                selected_move = indexes[i]
+                first_level = False
+            else:
+                selected_move = random.randint(0, moves_count - 1)
+
+            simulation.apply_move(moves[selected_move])
+
+    return delta #float(own_moves - opp_moves + 5 * delta)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 
