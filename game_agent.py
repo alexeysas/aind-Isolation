@@ -113,7 +113,7 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    #own_moves = len(game.get_legal_moves(player))
+    own_moves = len(game.get_legal_moves(player))
     #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
     delta = 0
@@ -143,7 +143,7 @@ def custom_score_2(game, player):
 
             simulation.apply_move(moves[selected_move])
 
-    return delta #float(own_moves - opp_moves + 5 * delta)
+    return float(own_moves + delta) #float(own_moves - opp_moves + 5 * delta)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 
@@ -176,7 +176,9 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return float(free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
+    own_moves = len(game.get_legal_moves(player))
+    
+    return float(own_moves + 0.5 * (free_area_score(game, player) - free_area_score(game, game.get_opponent(player))))
 
 
 class IsolationPlayer:
