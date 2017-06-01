@@ -5,34 +5,31 @@ and include the results in your report.
 import random
 import numpy as np
 
-w1 = np.loadtxt('w1.txt')
-b1 = np.loadtxt('b1.txt')
-
-w2 = np.loadtxt('w2.txt')
-b2 = np.loadtxt('b2.txt')
-
-w3 = np.loadtxt('w3.txt')
-b3 = np.loadtxt('b3.txt')
-
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
 
-def center_score(game, player): 
+def center_modified_score(game, player):
+    """The idea of this score is to be closer to the center
+        - which might be important in the begiining of the game to get better position
+        unlike standard center score 
+        it provides same punishment for being in corner on near the border"""
     w, h = game.width / 2., game.height / 2.
     y, x = game.get_player_location(player)
 
-    return float(max(np.abs(h - y), np.abs(w - x)))
+    return -float(max(np.abs(h - y), np.abs(w - x)))
 
-def free_area_score(game, player, e=2, spaces = None): 
+def free_area_score(game, player, e=2):
+    """The idea of this score is to be closer to more sparse part of the board
+        - which might be important and give better chance to fing good moves
+        it provides punishment for being inm the fully filled partition of the board"""
+
     y, x = game.get_player_location(player)
 
-    if spaces == None:
-        spaces = game.get_blank_spaces()
-
-    data = [1 for sy, sx in spaces if (sy - y) + (sy - y) <= e]
-
+    spaces = game.get_blank_spaces()
+    data = [1 for sy, sx in spaces if (sx - x) + (sy - y) <= e]
     res = sum(data)
+
     return res
 
 def custom_score(game, player):
@@ -64,27 +61,8 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    if game.move_count > 10:
-        own_moves = len(game.get_legal_moves(player))
-        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-        return float(own_moves - opp_moves)
-
-    x = np.array(game._board_state).reshape(-1, 1).T
-    
-    l1 = np.dot(x, w1) + b1
-    l1 = np.maximum(l1, 0)
-    l2 = np.dot(l1, w2) + b2
-    l2 = np.maximum(l2, 0)
-    l3 = np.dot(l2, w3) + b3
-    
-    #print (player == game.active_player)
-    if (player == game.active_player):
-        return l3
-    else:
-        return l3
-
-    if game.move_count < 23:
-        return center_score(game, player)
+    if game.move_count < 15:
+        return center_modified_score(game, player)
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
@@ -120,7 +98,7 @@ def custom_score_2(game, player):
 
     own_moves = len(game.get_legal_moves(player))
 
-    if game.move_count < 23:
+    if game.move_count < 15:
         opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
         return float(own_moves - opp_moves)
 
@@ -184,13 +162,13 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
+    #own_moves = len(game.get_legal_moves(player))
 
-    if game.move_count < 23:
-        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-        return float(own_moves - opp_moves)
+    #if game.move_count < 23:
+    #    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    #    return float(own_moves - opp_moves)
 
-    return float(own_moves + 0.5 * (free_area_score(game, player) - free_area_score(game, game.get_opponent(player))))
+    return float(free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 
 
 class IsolationPlayer:

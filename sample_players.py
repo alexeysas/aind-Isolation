@@ -130,7 +130,7 @@ def center_score(game, player):
 
     w, h = game.width / 2., game.height / 2.
     y, x = game.get_player_location(player)
-    return float((h - y)**2 + (w - x)**2)
+    return -float((h - y)**2 + (w - x)**2)
 
 
 class RandomPlayer():
