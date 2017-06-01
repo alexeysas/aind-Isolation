@@ -45,6 +45,7 @@ class Board(object):
         self._player_2 = player_2
         self._active_player = player_1
         self._inactive_player = player_2
+        self.data = []
 
         # The last 3 entries of the board state includes initiative (0 for
         # player 1, 1 for player 2) player 2 last move, and player 1 last move
@@ -344,6 +345,13 @@ class Board(object):
             #print(curr_move)
                         
             self.apply_move(curr_move)
-
+          
+            data = {}
+            data['state'] = self._board_state.copy()
+            data['player'] = 2 if self.active_player == self._player_1 else 1
+            data['won'] = None
+            data['move'] = self.move_count
+        
+            self.data.append(data)
             #input("Press Enter to continue...")
             #i=i+1

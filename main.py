@@ -4,6 +4,7 @@ from game_agent import AlphaBetaPlayer
 from game_agent import custom_score
 from game_agent import custom_score_2
 from game_agent import custom_score_3
+import random
 
 def null_score(game, player):
     """This heuristic presumes no knowledge for non-terminal states, and
@@ -198,39 +199,54 @@ class GreedyPlayer():
 
 from isolation import Board
 
-# create an isolation board (by default 7x7)
-player1 = AlphaBetaPlayer()
-player1.score = improved_score
+res_data = []
 
-player2 = AlphaBetaPlayer()
-player2.score = custom_score
+for _ in range (1):
+    # create an isolation board (by default 7x7)
+    player1 = AlphaBetaPlayer()
+    player1.score = improved_score
 
-game = Board(player1, player2)
+    player2 = AlphaBetaPlayer()
+    player2.score = custom_score
 
-# place player 1 on the board at row 2, column 3, then place player 2 on
-# the board at row 0, column 5; display the resulting board state.  Note
-# that the .apply_move() method changes the calling object in-place.
-game.apply_move((0, 0))
-game.apply_move((6, 6))
-#print(game.to_string())
+    game = Board(player1, player2)
 
-# players take turns moving on the board, so player1 should be next to move
-assert(player1 == game.active_player)
+    # place player 1 on the board at row 2, column 3, then place player 2 on
+    # the board at row 0, column 5; display the resulting board state.  Note
+    # that the .apply_move() method changes the calling object in-place.
+    for _ in range(2):
+            move = random.choice(game.get_legal_moves())
+            game.apply_move(move)
+    #print(game.to_string())
 
-# get a list of the legal moves available to the active player
-#print(game.get_legal_moves())
+    # players take turns moving on the board, so player1 should be next to move
+    assert(player1 == game.active_player)
 
-# get a successor of the current state by making a copy of the board and
-# applying a move. Notice that this does NOT change the calling object
-# (unlike .apply_move()).
-new_game = game.forecast_move((1, 1))
-assert(new_game.to_string() != game.to_string())
-print("\nOld state:\n{}".format(game.to_string()))
-print("\nNew state:\n{}".format(new_game.to_string()))
+    #print("\nOld state:\n{}".format(game.to_string()))
 
-# play the remainder of the game automatically -- outcome can be "illegal
-# move", "timeout", or "forfeit"
-winner, history, outcome = game.play()
-print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
-print(game.to_string())
-print("Move history:\n{!s}".format(history))
+
+    # play the remainder of the game automatically -- outcome can be "illegal
+    # move", "timeout", or "forfeit"
+    winner, history, outcome = game.play()
+    print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
+    print(game.to_string())
+    print("Move history:\n{!s}".format(history))
+    #print(game.data)
+    for element in game.data:
+        if winner == game._player_1:
+            if element['player'] == 1:
+                element['won'] = True
+            else:
+                element['won'] = False
+        else:
+            if element['player'] == 2:
+                element['won'] = True
+            else:
+                element['won'] = False
+
+   # res_data.append(game.data)
+
+import pickle
+
+#with open('outfile.txt', 'wb') as fp:
+#    pickle.dump(res_data, fp)

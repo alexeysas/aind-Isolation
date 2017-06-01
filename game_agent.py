@@ -5,6 +5,15 @@ and include the results in your report.
 import random
 import numpy as np
 
+w1 = np.loadtxt('w1.txt')
+b1 = np.loadtxt('b1.txt')
+
+w2 = np.loadtxt('w2.txt')
+b2 = np.loadtxt('b2.txt')
+
+w3 = np.loadtxt('w3.txt')
+b3 = np.loadtxt('b3.txt')
+
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
@@ -13,7 +22,7 @@ def center_score(game, player):
     w, h = game.width / 2., game.height / 2.
     y, x = game.get_player_location(player)
 
-    return float((h - y)**2 + (w - x)**2)
+    return float(max(np.abs(h - y), np.abs(w - x)))
 
 def free_area_score(game, player, e=2, spaces = None): 
     y, x = game.get_player_location(player)
@@ -55,39 +64,31 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
+    if game.move_count > 10:
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves - opp_moves)
+
+    x = np.array(game._board_state).reshape(-1, 1).T
+    
+    l1 = np.dot(x, w1) + b1
+    l1 = np.maximum(l1, 0)
+    l2 = np.dot(l1, w2) + b2
+    l2 = np.maximum(l2, 0)
+    l3 = np.dot(l2, w3) + b3
+    
+    #print (player == game.active_player)
+    if (player == game.active_player):
+        return l3
+    else:
+        return l3
+
+    if game.move_count < 23:
+        return center_score(game, player)
+
     own_moves = len(game.get_legal_moves(player))
-    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-
-    delta = 0
-   
-    moves = game.get_legal_moves()
-    initial_moves_count = len(moves)
-    indexes = np.random.permutation(initial_moves_count)
-
-    for i in range(0, min(4, initial_moves_count)):
-        first_level = True
-        simulation = game.copy()
-        depth = 0
-        while True:
-            depth = depth + 1
-            moves = simulation.get_legal_moves()
-            moves_count = len(moves)
-            if moves_count == 0:
-                if simulation.is_winner(player):
-                    delta = delta + depth
-                else:
-                    delta = delta + depth
-                break
-            if first_level:
-                selected_move = indexes[i]
-                first_level = False
-            else:
-                selected_move = random.randint(0, moves_count - 1)
-
-            simulation.apply_move(moves[selected_move])
-
-    return float(own_moves * delta) #float(own_moves - opp_moves + 5 * delta)
-
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -118,10 +119,13 @@ def custom_score_2(game, player):
         return float("inf")
 
     own_moves = len(game.get_legal_moves(player))
-    #opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    if game.move_count < 23:
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves - opp_moves)
 
     delta = 0
-   
+
     moves = game.get_legal_moves()
     initial_moves_count = len(moves)
     indexes = np.random.permutation(initial_moves_count)
@@ -147,7 +151,7 @@ def custom_score_2(game, player):
 
             simulation.apply_move(moves[selected_move])
 
-    return float(own_moves + 0.1 * delta) #float(own_moves - opp_moves + 5 * delta)
+    return float(own_moves + delta) #float(own_moves - opp_moves + 5 * delta)
 
     #return float(own_moves - opp_moves + free_area_score(game, player) - free_area_score(game, game.get_opponent(player)))
 
@@ -181,7 +185,11 @@ def custom_score_3(game, player):
         return float("inf")
 
     own_moves = len(game.get_legal_moves(player))
-    
+
+    if game.move_count < 23:
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves - opp_moves)
+
     return float(own_moves + 0.5 * (free_area_score(game, player) - free_area_score(game, game.get_opponent(player))))
 
 
@@ -393,7 +401,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             return self.best_move
         except SearchTimeout:
             return self.best_move
-       
+
         return self.best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
